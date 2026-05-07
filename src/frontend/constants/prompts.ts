@@ -82,15 +82,18 @@ export interface MCPToolConfig {
 /**
  * 核心规范（基础交互规范）
  * 这些规则不可被其他上下文覆盖
+ *
+ * 单一事实源对齐：与仓库根目录 sanshu_prompt_core.md 保持文案一致
+ * 修改本常量时，请同步更新 sanshu_prompt_core.md（反之亦然）
  */
 export const CORE_RULES = `
 # 核心契约（不可违反）
-1. **代码质量**：严格遵循 KISS / YAGNI / SOLID 原则
-2. **交互控制**：AI所有回答都必须通过 \`三术\` / \`zhi\` 工具向我展示
-3. **记忆管理**：对话开始时加载 \`memory\` 记忆，用户说"请记住"时存储关键信息
-4. **知识权威**：当需要最新框架文档或 AI 内部知识不确定时优先查询 \`context7\` 权威文档
-5. **上下文感知**：深度感知项目结构、依赖和技术栈
-6. **静默执行**：不创建文档、不测试、不编译、不运行
+1. **代码哲学**：严格遵循 KISS / YAGNI / SOLID；不做过度设计、不加用不到的抽象
+2. **强制交互**：所有方案确认与任务收尾必须通过 \`三术\` / \`zhi\` 工具展示；未得到完成指令前禁止主动结束对话
+3. **证据优先**：任何分析必须基于真实搜索/读取到的代码；先用 \`sou\` 语义定位，再用 Read/Grep 确认实现，严禁臆测
+4. **知识权威**：需要框架/库的最新文档时优先用 \`context7\`，避免训练数据过时
+5. **持久化记忆**：对话开始时调用 \`ji\` 加载项目记忆；用户说"请记住"时主动存储为合适分类
+6. **输出规范**：注释/日志默认中文；修改点必须有中文注释解释意图（why）；引用代码给出 \`文件路径:行号\`
 
 ---
 `
@@ -105,21 +108,18 @@ export const CORE_RULES = `
  */
 export const MCP_TOOLS_CONFIG: ToolPromptConfig[] = [
   // zhi (智) - 强制交互网关
+  // 与 CORE_RULES 第 2 条「强制交互」对齐，此处只补充触发场景，不重复硬性约束
   {
     id: 'zhi',
     name: '三术',
-    description: '汇总方案摘要、候选项与处理结果，提供结构化记录',
+    description: '强制交互网关：方案确认、候选项呈现、任务收尾',
     prompt: {
-      base: '', // 交互控制规则已在 CORE_RULES 中定义
+      base: '',
       whenToUse: [
-        '需求不明确时：提供预定义选项让用户澄清',
-        '存在多个方案时：列出所有方案（附 KISS/YAGNI/SOLID 分析和推荐标签）',
-        '计划或策略变更时：提出并获得用户批准',
-        '任务完成前：必须请求最终确认',
+        '多方案抉择：列出所有候选并标注推荐项',
+        '计划变更 / 任务完成：请求用户确认',
       ],
-      howToUse: [
-        '未得到完成指令前禁止主动结束对话',
-      ],
+      howToUse: [],
     },
     ui: {
       enabled: true,
@@ -134,17 +134,14 @@ export const MCP_TOOLS_CONFIG: ToolPromptConfig[] = [
   {
     id: 'memory',
     name: '记忆管理',
-    description: '全局记忆管理工具，用于存储和管理重要的开发规范、用户偏好和最佳实践',
+    description: '项目级记忆库：规范、偏好、模式、上下文',
     prompt: {
       base: '',
       whenToUse: [
-        '对话开始时：调用 `回忆` 加载项目记忆',
-        '用户说"请记住"时：总结后调用 `记忆` 存储',
+        '对话开始：加载 `project_path`（git 根目录）下的记忆',
+        '用户说「请记住」：总结后存储为合适分类',
       ],
-      howToUse: [
-        '`project_path` 使用 git 根目录',
-        '仅在重要变更时更新，保持简洁',
-      ],
+      howToUse: [],
     },
     ui: {
       enabled: true,
@@ -159,16 +156,13 @@ export const MCP_TOOLS_CONFIG: ToolPromptConfig[] = [
   {
     id: 'sou',
     name: '代码搜索',
-    description: '基于查询在特定项目中搜索相关的代码上下文，支持语义搜索和增量索引',
+    description: '项目内语义搜索：定位实现、调用关系、上下文',
     prompt: {
       base: '',
       whenToUse: [
-        '查找代码时：语义搜索快速定位',
-        '理解上下文时：搜索相关实现和调用关系',
+        '分析前必须先用 `sou` 定位证据，再用 Read/Grep 确认',
       ],
-      howToUse: [
-        '使用绝对路径和自然语言查询',
-      ],
+      howToUse: [],
     },
     ui: {
       enabled: false, // 默认关闭：依赖第三方 acemcp 服务
@@ -183,20 +177,18 @@ export const MCP_TOOLS_CONFIG: ToolPromptConfig[] = [
   {
     id: 'context7',
     name: '框架文档',
-    description: '查询最新的框架和库文档，支持 Next.js、React、Vue、Spring 等主流框架',
+    description: '查询框架/库的最新官方文档（Next.js / React / Vue / Spring 等）',
     prompt: {
       base: '',
       whenToUse: [
-        '获取最新文档时：查询框架/库官方文档',
-        'AI 知识不确定时：优先查询权威文档避免幻觉',
+        'AI 知识可能过时或不确定时优先查询，避免幻觉',
       ],
       howToUse: [
-        '`library` 格式 `owner/repo`（如 `vercel/next.js`）',
-        '不确定标识符时可用简短名称，工具自动搜索',
+        '`library` 格式 `owner/repo`（如 `vercel/next.js`），不确定时可用短名',
       ],
     },
     ui: {
-      enabled: true, // 默认启用：免费使用无需配置
+      enabled: true,
       canDisable: true,
       icon: 'i-carbon-document text-lg text-orange-600 dark:text-orange-400',
       iconBg: 'bg-orange-100',
@@ -204,20 +196,42 @@ export const MCP_TOOLS_CONFIG: ToolPromptConfig[] = [
     },
   },
 
+  // uiux - UI/UX 美化与设计审查
+  // 与 CORE_RULES 协同，此处仅补充触发场景与输出参考字段
+  {
+    id: 'uiux',
+    name: 'UI/UX 工具',
+    description: '页面美化、UI 描述、设计系统、UI 审查的单一入口',
+    prompt: {
+      base: '',
+      whenToUse: [
+        '涉及页面美化 / UI 描述 / 设计系统 / UI 审查时优先使用',
+      ],
+      howToUse: [
+        '参考返回的 `prompt` / `uiux_hits` / `project_context` 三个字段',
+      ],
+    },
+    ui: {
+      enabled: true,
+      canDisable: true,
+      icon: 'i-carbon-color-palette text-lg text-pink-600 dark:text-pink-400',
+      iconBg: 'bg-pink-100',
+      darkIconBg: 'dark:bg-pink-900',
+    },
+  },
+
   // enhance - 提示词增强
   {
     id: 'enhance',
     name: '提示词增强',
-    description: '将口语化提示词增强为结构化专业提示词，支持上下文与历史',
+    description: '把口语化提示词改写为结构化版本',
     prompt: {
       base: '',
       whenToUse: [
-        '需要把口语化或模糊提示词改写为清晰、具体、无歧义版本时',
-        '希望结合项目上下文与历史交互提升提示词质量时',
+        '原始提示词模糊或口语化时',
       ],
       howToUse: [
-        '提供原始提示词，必要时传入项目路径以启用上下文',
-        '未启用时先在 MCP 工具中启用并配置 acemcp',
+        '依赖 acemcp 配置；传入项目路径可启用项目上下文',
       ],
     },
     ui: {

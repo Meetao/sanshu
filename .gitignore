@@ -87,3 +87,6 @@ demo/
 docs/
 
 test/
+
+# AI
+.claude
