@@ -1,8 +1,7 @@
 <script setup lang="ts">
-import hljs from 'highlight.js'
-import MarkdownIt from 'markdown-it'
 import { useMessage } from 'naive-ui'
 import { computed, onMounted, onUnmounted, ref } from 'vue'
+import { useMarkdown } from '../../composables/useMarkdown'
 import { useVersionCheck } from '../../composables/useVersionCheck'
 
 const props = defineProps<Props>()
@@ -11,27 +10,7 @@ const emit = defineEmits<{
   'update:show': [value: boolean]
 }>()
 
-// 创建 Markdown 渲染实例，配置代码高亮
-const md = new MarkdownIt({
-  html: false, // 禁止原始 HTML 标签，防止 XSS
-  xhtmlOut: false,
-  breaks: true, // 将换行符转换为 <br>
-  langPrefix: 'language-',
-  linkify: true, // 自动识别链接
-  typographer: true,
-  highlight(str: string, lang: string) {
-    // 代码高亮处理
-    if (lang && hljs.getLanguage(lang)) {
-      try {
-        return hljs.highlight(str, { language: lang }).value
-      }
-      catch {
-        // 忽略高亮错误
-      }
-    }
-    return '' // 使用默认转义
-  },
-})
+const { renderMarkdownSimple } = useMarkdown()
 
 interface Props {
   show: boolean
@@ -115,22 +94,11 @@ const connectionDescription = computed(() => {
   return '直连'
 })
 
-// 使用 markdown-it 渲染更新说明
+// 使用共享 markdown 实例渲染更新说明
 const formattedReleaseNotes = computed(() => {
   if (!props.versionInfo?.releaseNotes)
     return ''
-  try {
-    return md.render(props.versionInfo.releaseNotes)
-  }
-  catch (error) {
-    console.error('Markdown 渲染失败:', error)
-    // 降级处理：返回转义后的纯文本
-    return props.versionInfo.releaseNotes
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/\n/g, '<br>')
-  }
+  return renderMarkdownSimple(props.versionInfo.releaseNotes)
 })
 
 const isVisible = computed({

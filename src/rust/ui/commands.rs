@@ -123,6 +123,43 @@ pub async fn set_theme(
     Ok(())
 }
 
+// 获取代码高亮主题
+#[tauri::command]
+pub async fn get_hljs_theme(state: State<'_, AppState>) -> Result<String, String> {
+    let config = state
+        .config
+        .lock()
+        .map_err(|e| format!("获取配置失败: {}", e))?;
+    Ok(config.ui_config.hljs_theme.clone())
+}
+
+// 设置代码高亮主题
+#[tauri::command]
+pub async fn set_hljs_theme(
+    theme: String,
+    state: State<'_, AppState>,
+    app: tauri::AppHandle,
+) -> Result<(), String> {
+    let valid = ["auto", "github", "github-dark", "monokai", "atom-one-dark", "vs2015"];
+    if !valid.contains(&theme.as_str()) {
+        return Err(format!("无效的代码高亮主题: {}", theme));
+    }
+
+    {
+        let mut config = state
+            .config
+            .lock()
+            .map_err(|e| format!("获取配置失败: {}", e))?;
+        config.ui_config.hljs_theme = theme;
+    }
+
+    save_config(&state, &app)
+        .await
+        .map_err(|e| format!("保存配置失败: {}", e))?;
+
+    Ok(())
+}
+
 #[tauri::command]
 pub async fn get_window_config(state: State<'_, AppState>) -> Result<WindowConfig, String> {
     let config = state

@@ -136,6 +136,13 @@ pub fn build_tauri_app() -> Builder<tauri::Wry> {
             auto_get_chat_id,
             start_telegram_sync,
 
+            // 代码高亮主题命令
+            get_hljs_theme,
+            set_hljs_theme,
+
+            // 代码执行命令
+            execute_code_snippet,
+
             // 系统命令
             open_external_url,
             exit_app,

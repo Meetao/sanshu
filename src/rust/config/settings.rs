@@ -40,6 +40,10 @@ pub struct UiConfig {
     // 置顶设置
     #[serde(default = "default_always_on_top")]
     pub always_on_top: bool,
+
+    // 代码高亮主题 ("auto", "github", "github-dark", "monokai", "atom-one-dark", "vs2015")
+    #[serde(default = "default_hljs_theme")]
+    pub hljs_theme: String,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -304,6 +308,7 @@ pub fn default_ui_config() -> UiConfig {
         font_config: default_font_config(),
         window_config: default_window_config(),
         always_on_top: default_always_on_top(),
+        hljs_theme: default_hljs_theme(),
     }
 }
 
@@ -369,6 +374,10 @@ pub fn default_custom_prompt_config() -> CustomPromptConfig {
 
 pub fn default_always_on_top() -> bool {
     window::DEFAULT_ALWAYS_ON_TOP
+}
+
+pub fn default_hljs_theme() -> String {
+    "auto".to_string()
 }
 
 pub fn default_audio_notification_enabled() -> bool {

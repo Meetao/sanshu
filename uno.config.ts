@@ -225,5 +225,7 @@ export default defineConfig({
     'i-carbon-direct-link',
     'i-carbon-ip',
     'i-carbon-chevron-down',
+    'i-carbon-terminal',
+    'i-carbon-quotes',
   ],
 })
