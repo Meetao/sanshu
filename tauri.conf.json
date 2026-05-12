@@ -53,6 +53,7 @@
             "core:webview:allow-webview-position",
             "core:webview:allow-webview-size",
             "shell:allow-open",
+            "clipboard-manager:allow-write-image",
             "updater:allow-check",
             "updater:allow-download",
             "updater:allow-install"

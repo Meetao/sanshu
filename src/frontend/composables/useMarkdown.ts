@@ -1,4 +1,6 @@
 import hljs from 'highlight.js'
+import { katex as markdownItKatex } from '@mdit/plugin-katex'
+import { renderToString as renderKatexToString } from 'katex'
 import MarkdownIt from 'markdown-it'
 import taskLists from 'markdown-it-task-lists'
 import { ref } from 'vue'
@@ -11,6 +13,20 @@ const EXECUTABLE_LANGUAGES = new Set([
   'go', 'golang',
   'java',
   'html',
+])
+
+// 流程图语言别名：统一转为 Mermaid 渲染卡片，避免被当作普通代码块显示。
+const MERMAID_LANGUAGES = new Set([
+  'mermaid',
+  'mmd',
+  'flowchart',
+])
+
+// 数学公式代码块别名：支持 ```math / ```tex / ```latex 的显示模式公式。
+const MATH_LANGUAGES = new Set([
+  'math',
+  'tex',
+  'latex',
 ])
 
 // 语言显示名称映射
@@ -67,6 +83,12 @@ const LANG_DISPLAY_NAMES: Record<string, string> = {
   'tsx': 'TSX',
   'md': 'Markdown',
   'markdown': 'Markdown',
+  'mermaid': 'Mermaid',
+  'mmd': 'Mermaid',
+  'flowchart': 'Mermaid',
+  'math': 'Math',
+  'tex': 'TeX',
+  'latex': 'LaTeX',
   'diff': 'Diff',
   'text': 'Text',
   'txt': 'Text',
@@ -128,6 +150,41 @@ function escapeHtml(str: string): string {
     .replace(/"/g, '&quot;')
 }
 
+function renderMathBlock(code: string): string {
+  try {
+    const rendered = renderKatexToString(code, {
+      displayMode: true,
+      throwOnError: false,
+      output: 'htmlAndMathml',
+      trust: false,
+    })
+    return `<div class="markdown-math-block">${rendered}</div>\n`
+  }
+  catch (error) {
+    return `<div class="markdown-math-block markdown-math-error" title="${escapeHtml(String(error))}">${escapeHtml(code)}</div>\n`
+  }
+}
+
+function renderMermaidBlock(lang: string, code: string, encodedCode: string): string {
+  const displayLang = getDisplayLang(lang || 'mermaid')
+  const escapedCode = escapeHtml(code)
+
+  return `<div class="mermaid-block-wrapper" data-diagram-code="${encodedCode}" data-diagram-lang="${escapeHtml(lang || 'mermaid')}">`
+    + `<div class="mermaid-block-header">`
+    + `<span class="mermaid-block-lang">${escapeHtml(displayLang)}</span>`
+    + `<div class="mermaid-block-actions">`
+    + `<button class="mermaid-source-toggle" title="切换流程图源码"><div class="i-carbon-code" style="width:14px;height:14px;display:block;"></div></button>`
+    + `<button class="mermaid-zoom-out" title="缩小流程图"><div class="i-carbon-zoom-out" style="width:14px;height:14px;display:block;"></div></button>`
+    + `<button class="mermaid-zoom-in" title="放大流程图"><div class="i-carbon-zoom-in" style="width:14px;height:14px;display:block;"></div></button>`
+    + `<button class="mermaid-zoom-reset" title="重置缩放"><div class="i-carbon-reset" style="width:14px;height:14px;display:block;"></div></button>`
+    + `<button class="mermaid-copy-image" title="复制流程图图片"><div class="i-carbon-copy" style="width:14px;height:14px;display:block;"></div></button>`
+    + `</div>`
+    + `</div>`
+    + `<div class="mermaid-stage"><div class="mermaid-render" aria-live="polite">流程图渲染中...</div></div>`
+    + `<pre class="mermaid-source"><code>${escapedCode}</code></pre>`
+    + `</div>\n`
+}
+
 // ========== 单例 ==========
 
 let instance: ReturnType<typeof createMarkdownInstance> | null = null
@@ -158,14 +215,30 @@ function createMarkdownInstance() {
   // 任务列表插件（只读模式）
   md.use(taskLists, { enabled: false, label: true })
 
+  // 数学公式插件：同时支持 $...$、$$...$$、\(...\)、\[...\]，并保持非信任模式。
+  md.use(markdownItKatex, {
+    delimiters: 'all',
+    mathFence: false,
+    throwOnError: false,
+    trust: false,
+  })
+
   // 自定义 fence 渲染器 — 输出结构化代码块 HTML
   md.renderer.rules.fence = (tokens, idx, options, _env, _renderer) => {
     const token = tokens[idx]
-    const lang = token.info.trim().split(/\s+/)[0] || ''
+    const lang = (token.info.trim().split(/\s+/)[0] || '').toLowerCase()
     const code = token.content
     const encodedCode = safeBase64Encode(code)
     const displayLang = getDisplayLang(lang)
     const executable = isExecutableLanguage(lang)
+
+    if (MERMAID_LANGUAGES.has(lang)) {
+      return renderMermaidBlock(lang, code, encodedCode)
+    }
+
+    if (MATH_LANGUAGES.has(lang)) {
+      return renderMathBlock(code)
+    }
 
     // 高亮处理
     let highlighted: string

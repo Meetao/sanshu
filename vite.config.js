@@ -29,7 +29,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           vendor: ['vue', '@vueuse/core'],
-          markdown: ['markdown-it', 'highlight.js', 'markdown-it-task-lists'],
+          markdown: ['markdown-it', 'highlight.js', 'markdown-it-task-lists', 'katex', '@mdit/plugin-katex'],
         },
       },
     },

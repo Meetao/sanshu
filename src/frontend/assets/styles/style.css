@@ -391,3 +391,303 @@ body {
 }
 .theme-dark .html-preview-frame { border-color: #374151; background: #ffffff; }
 .theme-light .html-preview-frame { border-color: #e5e7eb; background: #ffffff; }
+
+/* ========== Markdown 视图切换 ========== */
+.markdown-view-toolbar {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 0.625rem;
+}
+
+.markdown-view-tabs {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  padding: 0.125rem;
+  border: 1px solid;
+  border-radius: 0.375rem;
+}
+
+.markdown-view-toolbar.theme-dark .markdown-view-tabs {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: #374151;
+}
+
+.markdown-view-toolbar.theme-light .markdown-view-tabs {
+  background: #f9fafb;
+  border-color: #e5e7eb;
+}
+
+.markdown-view-tabs button,
+.mermaid-block-actions button,
+.markdown-image-action,
+.markdown-image-preview-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  min-width: 24px;
+  height: 24px;
+  padding: 0 0.375rem;
+  border: none;
+  border-radius: 0.25rem;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition: color 0.2s, background-color 0.2s;
+}
+
+.markdown-view-tabs button {
+  font-size: 0.72rem;
+}
+
+.markdown-view-tabs button > div,
+.markdown-image-preview-actions button > div {
+  width: 14px;
+  height: 14px;
+}
+
+.markdown-view-toolbar.theme-dark .markdown-view-tabs button { color: #d1d5db; }
+.markdown-view-toolbar.theme-light .markdown-view-tabs button { color: #4b5563; }
+.markdown-view-tabs button:hover,
+.mermaid-block-actions button:hover,
+.markdown-image-action:hover,
+.markdown-image-preview-actions button:hover {
+  color: #14b8a6;
+  background: rgba(20, 184, 166, 0.1);
+}
+
+.markdown-view-tabs button.active {
+  color: #14b8a6;
+  background: rgba(20, 184, 166, 0.14);
+}
+
+.markdown-raw-view {
+  margin: 0;
+  padding: 0.875rem;
+  max-height: 60vh;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-word;
+  border: 1px solid;
+  border-radius: 0.5rem;
+  font-size: 0.78rem;
+  line-height: 1.6;
+  font-family: var(--font-family-mono);
+}
+
+.markdown-raw-view.theme-dark {
+  color: #e5e7eb;
+  background: #050505;
+  border-color: #374151;
+}
+
+.markdown-raw-view.theme-light {
+  color: #1f2937;
+  background: #f9fafb;
+  border-color: #e5e7eb;
+}
+
+/* ========== Mermaid 流程图 ========== */
+.mermaid-block-wrapper {
+  margin: 0.875rem 0;
+  overflow: hidden;
+  border: 1px solid;
+  border-radius: 0.5rem;
+}
+
+.theme-dark .mermaid-block-wrapper {
+  background: #050505;
+  border-color: #374151;
+}
+
+.theme-light .mermaid-block-wrapper {
+  background: #ffffff;
+  border-color: #e5e7eb;
+}
+
+.mermaid-block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.375rem 0.625rem;
+  border-bottom: 1px solid;
+  user-select: none;
+}
+
+.theme-dark .mermaid-block-header {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: #374151;
+}
+
+.theme-light .mermaid-block-header {
+  background: #f9fafb;
+  border-color: #e5e7eb;
+}
+
+.mermaid-block-lang {
+  font-family: var(--font-family-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.theme-dark .mermaid-block-lang { color: #d1d5db; }
+.theme-light .mermaid-block-lang { color: #4b5563; }
+
+.mermaid-block-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.125rem;
+  flex-shrink: 0;
+}
+
+.theme-dark .mermaid-block-actions button { color: #d1d5db; }
+.theme-light .mermaid-block-actions button { color: #4b5563; }
+
+.mermaid-stage {
+  min-height: 180px;
+  max-height: 560px;
+  overflow: auto;
+  padding: 1rem;
+}
+
+.mermaid-render {
+  display: inline-block;
+  min-width: 100%;
+  color: inherit;
+}
+
+.mermaid-render svg {
+  max-width: none;
+  height: auto;
+  transition: width 0.18s ease, height 0.18s ease;
+}
+
+.mermaid-render.mermaid-error {
+  display: block;
+  min-width: 0;
+  color: #ef4444;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-size: 0.78rem;
+}
+
+.mermaid-source {
+  display: none;
+  margin: 0;
+  border-width: 1px 0 0;
+  border-radius: 0;
+  max-height: 260px;
+}
+
+.mermaid-block-wrapper.show-source .mermaid-source {
+  display: block;
+}
+
+/* ========== 数学公式 ========== */
+.markdown-content .katex {
+  font-size: 1em;
+}
+
+.markdown-content .katex-display,
+.markdown-math-block {
+  margin: 0.75rem 0;
+  overflow: auto hidden;
+}
+
+.markdown-math-block {
+  padding: 0.625rem 0.75rem;
+  border: 1px solid;
+  border-radius: 0.5rem;
+}
+
+.theme-dark .markdown-math-block {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: #374151;
+}
+
+.theme-light .markdown-math-block {
+  background: #f9fafb;
+  border-color: #e5e7eb;
+}
+
+.markdown-math-error {
+  color: #ef4444;
+  font-family: var(--font-family-mono);
+  white-space: pre-wrap;
+}
+
+/* ========== Markdown 图片工具 ========== */
+.markdown-image-wrapper {
+  position: relative;
+  display: inline-block;
+  max-width: 100%;
+  margin: 0.5rem 0;
+}
+
+.markdown-image-wrapper img {
+  display: block;
+  cursor: zoom-in;
+}
+
+.markdown-image-toolbar {
+  position: absolute;
+  top: 0.375rem;
+  right: 0.375rem;
+  display: inline-flex;
+  gap: 0.125rem;
+  padding: 0.125rem;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 0.375rem;
+  background: rgba(17, 24, 39, 0.72);
+  color: #e5e7eb;
+  opacity: 0;
+  transform: translateY(-2px);
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.markdown-image-wrapper:hover .markdown-image-toolbar,
+.markdown-image-wrapper:focus-within .markdown-image-toolbar {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.markdown-image-preview-modal {
+  max-width: min(92vw, 1100px);
+}
+
+.markdown-image-preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.markdown-image-preview-header span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.markdown-image-preview-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.125rem;
+  flex-shrink: 0;
+}
+
+.markdown-image-preview-body {
+  max-height: 72vh;
+  overflow: auto;
+  text-align: center;
+}
+
+.markdown-image-preview-body img {
+  max-width: none;
+  transform-origin: top center;
+  transition: transform 0.18s ease;
+}

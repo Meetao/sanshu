@@ -25,15 +25,19 @@
     "test:ui:build": "cd src/frontend/test && vite build"
   },
   "dependencies": {
+    "@mdit/plugin-katex": "^0.25.2",
     "@tanstack/vue-virtual": "^3.13.18",
     "@tauri-apps/api": "^2.5.0",
+    "@tauri-apps/plugin-clipboard-manager": "^2.3.2",
     "@tauri-apps/plugin-shell": "^2.2.1",
     "@types/markdown-it": "^14.1.2",
     "@vueuse/core": "^13.3.0",
     "@vueuse/integrations": "^13.4.0",
     "highlight.js": "^11.11.1",
+    "katex": "^0.16.45",
     "markdown-it": "^14.1.0",
     "markdown-it-task-lists": "^2.1.1",
+    "mermaid": "^11.15.0",
     "sortablejs": "^1.15.6",
     "vue": "^3.5.16"
   },

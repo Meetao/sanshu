@@ -51,6 +51,7 @@ import {
   NTree,
 } from 'naive-ui'
 import 'virtual:uno.css'
+import 'katex/dist/katex.min.css'
 import { createApp } from 'vue'
 import App from './App.vue'
 import './assets/styles/style.css'
