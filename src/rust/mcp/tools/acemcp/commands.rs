@@ -52,13 +52,13 @@ fn get_acemcp_log_path() -> Result<std::path::PathBuf, String> {
     }
 
     // 使用 dirs::config_dir() 获取系统配置目录，确保跨平台兼容性
-    // Windows: C:\Users\<用户>\AppData\Roaming\sanshu\log\acemcp.log
-    // Linux: ~/.config/sanshu/log/acemcp.log
-    // macOS: ~/Library/Application Support/sanshu/log/acemcp.log
+    // Windows: C:\Users\<用户>\AppData\Roaming\sanshu\log\sanshu-mcp.log
+    // Linux: ~/.config/sanshu/log/sanshu-mcp.log
+    // macOS: ~/Library/Application Support/sanshu/log/sanshu-mcp.log
     let config_dir = dirs::config_dir()
         .ok_or_else(|| "无法获取系统配置目录，请检查操作系统环境".to_string())?;
 
-    Ok(config_dir.join("sanshu").join("log").join("acemcp.log"))
+    Ok(config_dir.join("sanshu").join("log").join("sanshu-mcp.log"))
 }
 
 fn ensure_acemcp_log_dir_exists(log_path: &std::path::PathBuf) -> Result<(), String> {
@@ -546,7 +546,7 @@ pub async fn list_acemcp_log_targets() -> Result<Vec<AcemcpLogTargetInfo>, Strin
     let log_name = log_path
         .file_name()
         .and_then(|n| n.to_str())
-        .unwrap_or("acemcp.log");
+        .unwrap_or("sanshu-mcp.log");
 
     let mut out: Vec<AcemcpLogTargetInfo> = Vec::new();
 
@@ -613,7 +613,7 @@ pub async fn read_acemcp_logs(
     let log_path = get_acemcp_log_path()?;
     ensure_acemcp_log_dir_exists(&log_path)?;
 
-    // 读取当前日志 + 轮转备份（acemcp.log.1, acemcp.log.2 ...），返回最后 N 行（默认 1000，最大 5000）
+    // 读取当前日志 + 轮转备份（sanshu-mcp.log.1, sanshu-mcp.log.2 ...），返回最后 N 行（默认 1000，最大 5000）
     // 中文说明：使用流式读取避免在日志很大时一次性读入内存。
     use std::collections::VecDeque;
     use std::io::{BufRead, BufReader};
@@ -629,7 +629,7 @@ pub async fn read_acemcp_logs(
     let log_name = log_path
         .file_name()
         .and_then(|n| n.to_str())
-        .unwrap_or("acemcp.log");
+        .unwrap_or("sanshu-mcp.log");
 
     let mut candidates: Vec<std::path::PathBuf> = Vec::new();
     match target.as_str() {
@@ -813,7 +813,7 @@ pub async fn export_acemcp_logs(
 /// 启动 acemcp 日志流（tail -f）
 ///
 /// 中文说明：
-/// - 采用轮询方式读取 acemcp.log 新增内容，跨平台更稳定（Windows 轮转 rename 更容易兼容）
+/// - 采用轮询方式读取 sanshu-mcp.log 新增内容，跨平台更稳定（Windows 轮转 rename 更容易兼容）
 /// - 事件名称固定为 "acemcp-log-stream"，前端按需 listen/unlisten
 #[tauri::command]
 pub async fn start_acemcp_log_stream(

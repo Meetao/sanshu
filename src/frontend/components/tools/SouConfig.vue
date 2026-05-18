@@ -979,7 +979,7 @@ defineExpose({ saveConfig })
                 <template #icon>
                   <div class="i-carbon-terminal" />
                 </template>
-                日志路径: <code class="code-inline">{{ logFilePath || '默认：%APPDATA%/sanshu/log/acemcp.log (Windows) / ~/.config/sanshu/log/acemcp.log (macOS/Linux)' }}</code>
+                日志路径: <code class="code-inline">{{ logFilePath || '默认：%APPDATA%/sanshu/log/sanshu-mcp.log (Windows) / ~/.config/sanshu/log/sanshu-mcp.log (macOS/Linux)' }}</code>
               </n-alert>
 
               <n-space class="mt-3">

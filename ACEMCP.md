@@ -161,7 +161,7 @@
 
 - **配置**：存储在三术的配置文件中
 - **索引数据**：`~/.acemcp/data/projects.json`（项目索引信息）
-- **日志文件**：`~/.sanshu/log/acemcp.log`（工具运行日志）
+- **日志文件**：`~/.sanshu/log/sanshu-mcp.log`（工具运行日志）
 
 ### 索引状态与智能等待（与三术 MCP 集成时）
 

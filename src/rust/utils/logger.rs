@@ -59,12 +59,12 @@ impl Default for LogConfig {
 
 /// 获取 GUI 模式的日志文件路径
 /// 使用 dirs::config_dir() 确保跨平台兼容性
-/// Windows: C:\Users\<用户>\AppData\Roaming\sanshu\log\acemcp.log
-/// Linux: ~/.config/sanshu/log/acemcp.log
-/// macOS: ~/Library/Application Support/sanshu/log/acemcp.log
+/// Windows: C:\Users\<用户>\AppData\Roaming\sanshu\log\sanshu-mcp.log
+/// Linux: ~/.config/sanshu/log/sanshu-mcp.log
+/// macOS: ~/Library/Application Support/sanshu/log/sanshu-mcp.log
 fn get_gui_log_path() -> Option<PathBuf> {
     dirs::config_dir().map(|config_dir| {
-        config_dir.join("sanshu").join("log").join("acemcp.log")
+        config_dir.join("sanshu").join("log").join("sanshu-mcp.log")
     })
 }
 
@@ -94,7 +94,7 @@ fn rotate_log_if_needed(log_path: &PathBuf, rotation_config: &LogRotationConfig)
 }
 
 /// 执行日志文件轮转
-/// acemcp.log -> acemcp.log.1 -> acemcp.log.2 ...
+/// sanshu-mcp.log -> sanshu-mcp.log.1 -> sanshu-mcp.log.2 ...
 fn perform_log_rotation(log_path: &PathBuf, max_backup_count: u32) {
     let log_dir = match log_path.parent() {
         Some(dir) => dir,

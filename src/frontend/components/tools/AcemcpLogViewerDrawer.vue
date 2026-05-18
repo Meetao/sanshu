@@ -240,7 +240,7 @@ async function loadTargets() {
     message.error(`加载日志文件列表失败: ${e?.message || String(e)}`)
     targets.value = [
       { target: 'combined', label: '合并视图（备份 + 当前）', exists: true },
-      { target: 'current', label: 'acemcp.log', exists: true },
+      { target: 'current', label: 'sanshu-mcp.log', exists: true },
     ]
   }
 }
