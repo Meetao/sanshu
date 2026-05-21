@@ -150,6 +150,35 @@ function escapeHtml(str: string): string {
     .replace(/"/g, '&quot;')
 }
 
+function normalizeInlineColorValue(value: string): string | null {
+  const color = value.trim()
+
+  if (/^#(?:[\da-f]{3}|[\da-f]{4}|[\da-f]{6}|[\da-f]{8})$/i.test(color)) {
+    return color
+  }
+
+  // 中文说明：仅放行数字、百分比、逗号、空格和斜杠组成的颜色函数，避免把任意内容写入内联 style。
+  if (/^(?:rgb|hsl)a?\([\d\s%,./+-]+\)$/i.test(color)) {
+    return color
+  }
+
+  return null
+}
+
+function renderInlineCode(tokenContent: string): string {
+  const colorValue = normalizeInlineColorValue(tokenContent)
+  const escapedContent = escapeHtml(tokenContent)
+
+  if (!colorValue) {
+    return `<code>${escapedContent}</code>`
+  }
+
+  return `<code class="markdown-color-code" style="--markdown-color-swatch:${colorValue};">`
+    + `<span class="markdown-color-swatch" aria-hidden="true"></span>`
+    + `<span>${escapedContent}</span>`
+    + `</code>`
+}
+
 function renderMathBlock(code: string): string {
   try {
     const rendered = renderKatexToString(code, {
@@ -222,6 +251,11 @@ function createMarkdownInstance() {
     throwOnError: false,
     trust: false,
   })
+
+  // 行内颜色值预览：让 `#1E2937` / `rgb(...)` / `hsl(...)` 等证据颜色直接带色块显示。
+  md.renderer.rules.code_inline = (tokens, idx) => {
+    return renderInlineCode(tokens[idx].content)
+  }
 
   // 自定义 fence 渲染器 — 输出结构化代码块 HTML
   md.renderer.rules.fence = (tokens, idx, options, _env, _renderer) => {
