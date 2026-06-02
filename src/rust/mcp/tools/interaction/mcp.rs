@@ -1,11 +1,11 @@
 use anyhow::Result;
-use rmcp::model::{ErrorData as McpError, CallToolResult};
+use rmcp::model::{CallToolResult, ErrorData as McpError};
 
-use crate::mcp::{ZhiRequest, PopupRequest};
 use crate::mcp::handlers::{create_tauri_popup, parse_mcp_response};
-use crate::mcp::utils::{generate_request_id, normalize_zhi_choices, popup_error};
 use crate::mcp::utils::safe_truncate_clean;
-use crate::{log_important, log_debug};
+use crate::mcp::utils::{generate_request_id, normalize_zhi_choices, popup_error};
+use crate::mcp::{PopupRequest, ZhiRequest};
+use crate::{log_debug, log_important};
 
 /// 代码审阅记录工具
 ///
@@ -14,9 +14,7 @@ use crate::{log_important, log_debug};
 pub struct InteractionTool;
 
 impl InteractionTool {
-    pub async fn zhi(
-        request: ZhiRequest,
-    ) -> Result<CallToolResult, McpError> {
+    pub async fn zhi(request: ZhiRequest) -> Result<CallToolResult, McpError> {
         // 默认生成 request_id（MCP server 会优先使用其 call_id 注入到 zhi_with_request_id）
         let request_id = generate_request_id();
         Self::zhi_with_request_id(request, request_id).await
@@ -83,7 +81,12 @@ impl InteractionTool {
                 Ok(CallToolResult::success(content))
             }
             Err(e) => {
-                log_important!(warn, "[zhi] 弹窗失败: request_id={}, error={}", request_id, e);
+                log_important!(
+                    warn,
+                    "[zhi] 弹窗失败: request_id={}, error={}",
+                    request_id,
+                    e
+                );
                 Err(popup_error(e.to_string()).into())
             }
         }

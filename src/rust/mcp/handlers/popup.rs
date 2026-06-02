@@ -1,12 +1,12 @@
 use anyhow::Result;
-use std::process::Command;
 use std::fs;
 use std::path::Path;
+use std::process::Command;
 use std::time::Instant;
 
 use crate::mcp::types::PopupRequest;
 use crate::mcp::utils::safe_truncate_clean;
-use crate::{log_important, log_debug};
+use crate::{log_debug, log_important};
 
 /// 创建 Tauri 弹窗
 ///
