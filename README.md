@@ -527,6 +527,9 @@ pnpm install
 pnpm build
 cargo build --release
 
+# Windows 可使用项目脚本输出构建信息、MD5 和 SHA256
+powershell -ExecutionPolicy Bypass -File scripts/build-release-windows.ps1
+
 # 4. 安装 CLI 工具
 # Linux/macOS
 ./install.sh
@@ -562,13 +565,28 @@ cargo build
 # Cargo 构建后端（Release 模式，优化体积和性能）
 cargo build --release
 
+# Windows Debug 构建：先构建前端，再构建 Debug 后端，并输出 Hash 信息
+powershell -ExecutionPolicy Bypass -File scripts/build-debug-windows.ps1
+
+# Windows Release 构建：先构建前端，再构建 Release 后端，并输出 Hash 信息
+powershell -ExecutionPolicy Bypass -File scripts/build-release-windows.ps1
+
+# Windows 同时构建 Debug + Release
+powershell -ExecutionPolicy Bypass -File scripts/build-windows.ps1
+
+# Windows 构建信息输出位置：
+# - target/build-info/windows-build-info-debug.json
+# - target/build-info/windows-build-info-debug.md
+# - target/build-info/windows-build-info-release.json
+# - target/build-info/windows-build-info-release.md
+
 # Tauri 完整打包（生成安装包，包含前后端）
 pnpm tauri:build
 # 或
 cargo tauri build
 
 # 打包产物位置：
-# - Windows: src-tauri/target/release/bundle/
+# - Windows: target/release/bundle/
 # - macOS: src-tauri/target/release/bundle/dmg/ 或 .app
 # - Linux: src-tauri/target/release/bundle/deb/ 或 .AppImage
 ```
