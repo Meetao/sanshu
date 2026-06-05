@@ -32,7 +32,6 @@
 
 ## 验证方式
 
-- 运行 `scripts/verify-log-viewer.ps1` 检查关键代码锚点。
 - 运行 `pnpm build` 验证前端类型和构建。
 - 运行 `cargo check` 验证 Rust 代码。
 
