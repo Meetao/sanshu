@@ -7,7 +7,6 @@ import { invoke } from '@tauri-apps/api/core'
 import { useMessage } from 'naive-ui'
 import { computed, onMounted, ref, watch } from 'vue'
 import { useAcemcpSync } from '../../composables/useAcemcpSync'
-import { useLogViewer } from '../../composables/useLogViewer'
 import ConfigSection from '../common/ConfigSection.vue'
 import ProjectIndexManager from '../settings/ProjectIndexManager.vue'
 import ProxySettingsModal from './SouProxySettingsModal.vue'
@@ -62,12 +61,10 @@ const config = ref({
 
 const loadingConfig = ref(false)
 const showProxyModal = ref(false)
-const logFilePath = ref('')
 const lastSavedConnection = ref({
   base_url: '',
   token: '',
 })
-const { open: openLogViewer } = useLogViewer()
 // 调试状态
 const debugProjectRoot = ref('')
 const debugQuery = ref('')
@@ -344,16 +341,6 @@ async function detectFastContextApiKey(showFeedback = true) {
   }
 }
 
-async function loadLogFilePath() {
-  try {
-    const path = await invoke('get_acemcp_log_file_path') as string
-    logFilePath.value = path || ''
-  }
-  catch {
-    logFilePath.value = ''
-  }
-}
-
 async function saveConfig() {
   try {
     if (config.value.base_url && !/^https?:\/\//i.test(config.value.base_url)) {
@@ -574,22 +561,6 @@ async function copyDebugResult() {
   }
 }
 
-async function viewLogs() {
-  try {
-    const lines = await invoke('read_acemcp_logs') as string[]
-    if (lines.length > 0) {
-      await navigator.clipboard.writeText(lines.join('\n'))
-      message.success(`已复制 ${lines.length} 行日志`)
-    }
-    else {
-      message.info('日志为空')
-    }
-  }
-  catch (e) {
-    message.error(`读取日志失败: ${e}`)
-  }
-}
-
 async function clearCache() {
   try {
     message.loading('正在清除...')
@@ -634,7 +605,6 @@ watch(() => config.value.text_extensions, (list) => {
 onMounted(async () => {
   if (props.active) {
     await loadAcemcpConfig()
-    await loadLogFilePath()
     await Promise.all([
       fetchAutoIndexEnabled(),
       fetchWatchingProjects(),
@@ -970,16 +940,16 @@ defineExpose({ saveConfig })
         </n-scrollbar>
       </n-tab-pane>
 
-      <!-- 日志与调试 -->
-      <n-tab-pane name="debug" tab="日志与调试">
+      <!-- Sou 专属调试 -->
+      <n-tab-pane name="debug" tab="调试">
         <n-scrollbar class="tab-scrollbar">
           <n-space vertical size="large" class="tab-content">
-            <ConfigSection title="工具状态" :no-card="true">
+            <ConfigSection title="工具调试" :no-card="true">
               <n-alert type="info" :bordered="false" class="info-alert">
                 <template #icon>
                   <div class="i-carbon-terminal" />
                 </template>
-                日志路径: <code class="code-inline">{{ logFilePath || '默认：%APPDATA%/sanshu/log/sanshu-mcp.log (Windows) / ~/.config/sanshu/log/sanshu-mcp.log (macOS/Linux)' }}</code>
+                全局日志已迁移到主界面的“日志”页；此处仅保留 Sou / ACE 连接、缓存和搜索调试。
               </n-alert>
 
               <n-space class="mt-3">
@@ -988,18 +958,6 @@ defineExpose({ saveConfig })
                     <div class="i-carbon-connection-signal" />
                   </template>
                   测试 ACE 连接
-                </n-button>
-                <n-button size="small" secondary @click="viewLogs">
-                  <template #icon>
-                    <div class="i-carbon-document" />
-                  </template>
-                  查看日志
-                </n-button>
-                <n-button size="small" secondary @click="openLogViewer()">
-                  <template #icon>
-                    <div class="i-carbon-view" />
-                  </template>
-                  实时日志
                 </n-button>
                 <n-button size="small" secondary @click="clearCache">
                   <template #icon>

@@ -240,7 +240,7 @@ onMounted(async () => {
       class="config-modal"
       transform-origin="center"
     >
-      <div class="min-h-[400px]">
+      <div class="config-modal-body min-h-[400px]">
         <SouConfig v-if="currentToolId === 'sou'" :active="showToolConfigModal" />
         <Context7Config v-else-if="currentToolId === 'context7'" :active="showToolConfigModal" />
         <EnhanceConfig
@@ -267,6 +267,19 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+/* 中文说明：配置弹窗统一约束高度，避免某个工具配置页内容过长时撑高整个窗口。 */
+:global(.config-modal .n-card__content) {
+  max-height: calc(100vh - 140px);
+  overflow: hidden;
+}
+
+.config-modal-body {
+  max-height: calc(100vh - 210px);
+  overflow: auto;
+  overscroll-behavior: contain;
+  padding-right: 2px;
+}
+
 /* ========== 工具卡片样式 ========== */
 .tool-card {
   position: relative;

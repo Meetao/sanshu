@@ -3,6 +3,7 @@ import { invoke } from '@tauri-apps/api/core'
 import { useMessage } from 'naive-ui'
 import { computed, ref } from 'vue'
 import IntroTab from '../tabs/IntroTab.vue'
+import LogsTab from '../tabs/LogsTab.vue'
 import McpToolsTab from '../tabs/McpToolsTab.vue'
 import PromptsTab from '../tabs/PromptsTab.vue'
 import SettingsTab from '../tabs/SettingsTab.vue'
@@ -165,6 +166,9 @@ function testPopup() {
               :auto-open-tool-request-id="props.autoOpenToolRequestId"
               @auto-open-handled="$emit('mcpToolAutoOpened', $event)"
             />
+          </n-tab-pane>
+          <n-tab-pane name="logs" tab="日志">
+            <LogsTab />
           </n-tab-pane>
           <n-tab-pane name="prompts" tab="参考提示词">
             <PromptsTab />
