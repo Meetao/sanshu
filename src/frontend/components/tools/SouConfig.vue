@@ -102,7 +102,7 @@ const detectingFastContextKey = ref(false)
 const fastContextKeyStatus = ref('')
 const fastContextKeyStatusType = ref<'success' | 'warning' | 'error' | 'info'>('info')
 
-type ExtensionGroup = {
+interface ExtensionGroup {
   id: string
   label: string
   description: string
@@ -110,7 +110,7 @@ type ExtensionGroup = {
   extensions: string[]
 }
 
-type ExtensionPreset = {
+interface ExtensionPreset {
   label: string
   description: string
   icon: string
@@ -1633,75 +1633,89 @@ defineExpose({ saveConfig })
           <n-space vertical size="large" class="tab-content">
             <ConfigSection title="全局策略">
               <n-alert type="info" :bordered="false" class="mb-3">
-                监听索引的长期职责由三术 MCP 进程维护；此页面只记录监听项目并展示状态。等一下窗口关闭后，三术进程会按配置恢复监听。
+                监听索引的长期职责由三术 MCP 进程维护；此页面只记录监听项目并展示状态。窗口关闭后，三术进程会按配置自动恢复监听。
               </n-alert>
 
-              <div class="auto-index-toggle">
-                <div class="toggle-info">
-                  <div class="toggle-icon">
-                    <div class="i-carbon-automatic w-5 h-5 text-primary-500" />
-                  </div>
-                  <div>
-                    <div class="toggle-title">
-                      自动索引
+              <div class="policy-card-grid">
+                <!-- 自动索引策略卡片 -->
+                <div class="policy-card">
+                  <div class="policy-card-header">
+                    <div class="policy-icon-wrapper">
+                      <div class="i-carbon-automatic w-5 h-5" />
                     </div>
-                    <div class="toggle-desc">
-                      文件变更时自动更新索引
+                    <div class="policy-meta">
+                      <div class="policy-title">
+                        自动索引
+                      </div>
+                      <div class="policy-desc">
+                        文件变更时自动更新索引
+                      </div>
+                    </div>
+                    <div class="policy-action">
+                      <n-switch :value="autoIndexEnabled" @update:value="toggleAutoIndex" />
                     </div>
                   </div>
                 </div>
-                <n-switch :value="autoIndexEnabled" @update:value="toggleAutoIndex" />
+
+                <!-- 自动索引嵌套项目策略卡片 -->
+                <div class="policy-card">
+                  <div class="policy-card-header">
+                    <div class="policy-icon-wrapper nested">
+                      <div class="i-carbon-folder-parent w-5 h-5" />
+                    </div>
+                    <div class="policy-meta">
+                      <div class="policy-title">
+                        自动索引嵌套项目
+                      </div>
+                      <div class="policy-desc">
+                        自动检测并索引所有 Git 子项目
+                      </div>
+                    </div>
+                    <div class="policy-action">
+                      <n-switch
+                        v-model:value="config.index_nested_projects"
+                        @update:value="saveConfig"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <!-- 嵌套项目自动索引开关 -->
-              <div class="auto-index-toggle mt-4">
-                <div class="toggle-info">
-                  <div class="toggle-icon nested-icon">
-                    <div class="i-carbon-folder-parent w-5 h-5 text-amber-500" />
-                  </div>
-                  <div>
-                    <div class="toggle-title">
-                      自动索引嵌套项目
+              <!-- 防抖延迟时间配置卡片 -->
+              <div class="policy-config-card mt-3">
+                <div class="config-card-content">
+                  <div class="config-meta">
+                    <div class="config-title-row">
+                      <span class="config-title">防抖延迟时间</span>
+                      <n-tooltip trigger="hover">
+                        <template #trigger>
+                          <div class="i-carbon-help text-xs opacity-50 ml-1 cursor-help" />
+                        </template>
+                        文件修改后等待指定时间无新修改才触发索引更新
+                      </n-tooltip>
                     </div>
-                    <div class="toggle-desc">
-                      对父目录索引时，自动检测并索引所有 Git 子项目
+                    <div class="config-desc">
+                      防止频繁保存导致多次不必要的索引重建
+                    </div>
+                  </div>
+                  <div class="config-action">
+                    <div class="debounce-input-wrapper">
+                      <n-input-number
+                        v-model:value="config.watch_debounce_minutes"
+                        :min="1"
+                        :max="30"
+                        :step="1"
+                        size="small"
+                        class="debounce-input"
+                      />
+                      <span class="debounce-unit">分钟</span>
                     </div>
                   </div>
                 </div>
-                <n-switch
-                  v-model:value="config.index_nested_projects"
-                  @update:value="saveConfig"
-                />
               </div>
 
-              <n-divider class="my-3" />
-
-              <n-form-item label="防抖延迟时间" :show-feedback="false">
-                <div class="debounce-input-wrapper">
-                  <n-input-number
-                    v-model:value="config.watch_debounce_minutes"
-                    :min="1"
-                    :max="30"
-                    :step="1"
-                    class="debounce-input"
-                  />
-                  <span class="debounce-unit">分钟</span>
-                </div>
-                <template #label>
-                  <div class="form-label-with-desc">
-                    <span>防抖延迟时间</span>
-                    <n-tooltip trigger="hover">
-                      <template #trigger>
-                        <div class="i-carbon-help text-xs opacity-50 ml-1" />
-                      </template>
-                      文件修改后等待指定时间无新修改才触发索引更新
-                    </n-tooltip>
-                  </div>
-                </template>
-              </n-form-item>
-
-              <div class="flex justify-end mt-3">
-                <n-button type="primary" size="small" @click="saveConfig">
+              <div class="policy-footer">
+                <n-button type="primary" size="small" class="save-btn" @click="saveConfig">
                   <template #icon>
                     <div class="i-carbon-save" />
                   </template>
@@ -2048,55 +2062,176 @@ defineExpose({ saveConfig })
   border-color: rgba(255, 255, 255, 0.08);
 }
 
-/* 自动索引开关 */
-.auto-index-toggle {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.toggle-info {
-  display: flex;
-  align-items: center;
+/* 莫兰迪全局策略样式重构 */
+.policy-card-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
+  margin-bottom: 12px;
 }
 
-.toggle-icon {
+@media (max-width: 640px) {
+  .policy-card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.policy-card {
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border, rgba(128, 128, 128, 0.15));
+  background: var(--color-container, rgba(255, 255, 255, 0.5));
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.policy-card:hover {
+  border-color: rgba(20, 184, 166, 0.35);
+  background: rgba(20, 184, 166, 0.02);
+  box-shadow: 0 4px 12px -2px rgba(20, 184, 166, 0.08);
+}
+
+:root.dark .policy-card:hover {
+  background: rgba(20, 184, 166, 0.04);
+}
+
+.policy-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+
+.policy-icon-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 8px;
   border-radius: 8px;
-  background: rgba(20, 184, 166, 0.1);
+  font-size: 18px;
+  color: rgb(20, 184, 166);
+  background: rgba(20, 184, 166, 0.08);
+  transition: background-color 0.2s ease;
 }
 
-:root.dark .toggle-icon {
-  background: rgba(20, 184, 166, 0.15);
+.policy-icon-wrapper.nested {
+  color: rgb(245, 158, 11);
+  background: rgba(245, 158, 11, 0.08);
 }
 
-/* 嵌套项目图标样式 */
-.toggle-icon.nested-icon {
-  background: rgba(245, 158, 11, 0.1);
+.policy-meta {
+  flex: 1;
+  min-width: 0;
 }
 
-:root.dark .toggle-icon.nested-icon {
-  background: rgba(245, 158, 11, 0.15);
-}
-
-.toggle-title {
-  font-size: 14px;
-  font-weight: 500;
+.policy-title {
+  font-size: 13px;
+  font-weight: 600;
   color: var(--color-on-surface, #111827);
+  line-height: 1.4;
 }
 
-:root.dark .toggle-title {
+:root.dark .policy-title {
   color: #e5e7eb;
 }
 
-.toggle-desc {
+.policy-desc {
+  font-size: 11px;
+  color: var(--color-on-surface-secondary, #6b7280);
+  line-height: 1.4;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+:root.dark .policy-desc {
+  color: #9ca3af;
+}
+
+/* 防抖配置卡片 */
+.policy-config-card {
+  padding: 12px 16px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border, rgba(128, 128, 128, 0.15));
+  background: var(--color-container, rgba(255, 255, 255, 0.5));
+  transition: all 0.2s ease;
+}
+
+.policy-config-card:hover {
+  border-color: rgba(20, 184, 166, 0.25);
+  box-shadow: 0 4px 10px -2px rgba(0, 0, 0, 0.04);
+}
+
+.config-card-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.config-meta {
+  flex: 1;
+}
+
+.config-title-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.config-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-on-surface, #111827);
+}
+
+:root.dark .config-title {
+  color: #e5e7eb;
+}
+
+.config-desc {
+  font-size: 11px;
+  color: var(--color-on-surface-secondary, #6b7280);
+  line-height: 1.4;
+}
+
+:root.dark .config-desc {
+  color: #9ca3af;
+}
+
+.debounce-input-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.debounce-input {
+  width: 100px;
+}
+
+.debounce-unit {
   font-size: 12px;
   color: var(--color-on-surface-secondary, #6b7280);
 }
 
-:root.dark .toggle-desc {
+:root.dark .debounce-unit {
   color: #9ca3af;
+}
+
+/* 页脚保存区域 */
+.policy-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 16px;
+}
+
+.save-btn {
+  border-radius: 8px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.save-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(20, 184, 166, 0.25);
 }
 
 /* 项目列表滚动容器 */

@@ -3,14 +3,6 @@ import { useMessage } from 'naive-ui'
 import { computed, defineAsyncComponent, onMounted, ref, watch } from 'vue'
 import { useMcpToolsReactive } from '../../composables/useMcpTools'
 
-// 异步加载配置组件
-const SouConfig = defineAsyncComponent(() => import('../tools/SouConfig.vue'))
-const Context7Config = defineAsyncComponent(() => import('../tools/Context7Config.vue'))
-const IconWorkshop = defineAsyncComponent(() => import('../tools/IconWorkshop/IconWorkshop.vue'))
-const EnhanceConfig = defineAsyncComponent(() => import('../tools/EnhanceConfig.vue'))
-const MemoryConfig = defineAsyncComponent(() => import('../tools/MemoryConfig.vue'))
-const TavilyConfig = defineAsyncComponent(() => import('../tools/TavilyConfig.vue'))
-
 const props = withDefaults(defineProps<{
   projectRootPath?: string | null
   autoOpenToolId?: string | null
@@ -19,10 +11,16 @@ const props = withDefaults(defineProps<{
   autoOpenToolId: null,
   autoOpenToolRequestId: 0,
 })
-
 const emit = defineEmits<{
   autoOpenHandled: [requestId: number]
 }>()
+// 异步加载配置组件
+const SouConfig = defineAsyncComponent(() => import('../tools/SouConfig.vue'))
+const Context7Config = defineAsyncComponent(() => import('../tools/Context7Config.vue'))
+const IconWorkshop = defineAsyncComponent(() => import('../tools/IconWorkshop/IconWorkshop.vue'))
+const EnhanceConfig = defineAsyncComponent(() => import('../tools/EnhanceConfig.vue'))
+const MemoryConfig = defineAsyncComponent(() => import('../tools/MemoryConfig.vue'))
+const TavilyConfig = defineAsyncComponent(() => import('../tools/TavilyConfig.vue'))
 
 // 全局 MCP 工具状态
 const {
